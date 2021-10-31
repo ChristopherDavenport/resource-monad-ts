@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "Resource Monad integration with promises",
   "main": "dist/index.js",
+  
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
@@ -12,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "yes"
+    "url": "https://github.com/ChristopherDavenport/resource-monad-ts"
   },
   "keywords": [
     "resource",
