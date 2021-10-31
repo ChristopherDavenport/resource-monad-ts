@@ -27,6 +27,8 @@ class Resource<A>{
   }
 }
 
+// Resource Creation Helpers
+
 function makeCase<A>(
   build: () => Promise<A>,
   onComplete: (a: A) => Promise<void>,
@@ -59,6 +61,9 @@ function pure<A>(a: A): Resource<A> {
 function promise<A>(f: () => Promise<A>): Resource<A>{
   return make(f, async () => {})
 }
+
+
+// Internal Method Functions
 function flatMapI<A, B>(resource: Resource<A>, f: (a: A) => Resource<B>): Resource<B> {
   const allocate: () => Promise<{value: B, shutdown: (exitCase: ExitCase) => Promise<void>}> = async () => {
     const allocated1 = await resource.allocate()
@@ -100,7 +105,10 @@ function useI<A, B> (resource: Resource<A>, f: (a: A) => Promise<B>): () => Prom
       const x = await f(value)
       return x
     } catch(e) {
-      await shutdown(e)
+      if (e instanceof Error){
+        await shutdown(e)
+        throw e
+      } else throw e // TODO I don't really understand this case...
     } finally {
       await shutdown('Success')
     }

@@ -3,7 +3,7 @@
   "version": "1.0.2",
   "description": "Resource Monad integration with promises",
   "main": "dist/index.js",
-  
+  "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",

@@ -6,14 +6,15 @@
       "noImplicitAny": true,
       "moduleResolution": "node",
       "sourceMap": true,
-    //   "inlineSourceMap": true,
       "outDir": "dist",
+      "strict": true,
       "baseUrl": ".",
       "paths": {
           "*": [
               "node_modules/*"
           ]
-      }
+      },
+      "declaration": true,
   },
   "include": [
       "src/**/*"
