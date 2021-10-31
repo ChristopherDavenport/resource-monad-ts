@@ -15,7 +15,7 @@ class Resource<A>{
   }
 
   public evalMap<B>(f: (a: A) => Promise<B>): Resource<B> {
-    return evalMapI(this, f)
+    return this.flatMap((a: A) => promise(() => f(a)))
   }
 
   public map<B>(f: (a: A) => B): Resource<B> {
@@ -68,28 +68,23 @@ function promise<A>(f: () => Promise<A>): Resource<A>{
 function flatMapI<A, B>(resource: Resource<A>, f: (a: A) => Resource<B>): Resource<B> {
   const allocate: () => Promise<{value: B, shutdown: (exitCase: ExitCase) => Promise<void>}> = async () => {
     const allocated1 = await resource.allocate()
-    const allocated2 = await f(allocated1.value).allocate()
-    return {
-      value: allocated2.value,
-      shutdown:  async  (exitCase: ExitCase) => {
-        await allocated2.shutdown(exitCase)
-        await allocated1.shutdown(exitCase)
+    try {
+      const allocated2 = await f(allocated1.value).allocate()
+      return {
+        value: allocated2.value,
+        shutdown:  async  (exitCase: ExitCase) => {
+          await allocated2.shutdown(exitCase)
+          await allocated1.shutdown(exitCase)
+        }
       }
-    }
-  }
-  return new Resource(allocate)
-}
-
-function evalMapI<A, B>(resource: Resource<A>, f: (a: A) => Promise<B>): Resource<B> {
-  const allocate: () => Promise<{value: B, shutdown: (exitCase: ExitCase) => Promise<void>}> = async () => {
-    const {
-      value,
-      shutdown
-    } = await resource.allocate()
-    const b = await f(value)
-    return {
-      value: b,
-      shutdown
+    } catch(e) {
+      if (e instanceof Error){
+        await allocated1.shutdown(e)
+        throw e
+      } else {
+        await allocated1.shutdown('UnknownError')
+        throw e
+      }
     }
   }
   return new Resource(allocate)
