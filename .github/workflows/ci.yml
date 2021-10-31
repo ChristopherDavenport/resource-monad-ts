@@ -1,0 +1,73 @@
+name: ci
+
+on:
+- pull_request
+- push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        name:
+        - Node.js 11.x
+        - Node.js 12.x
+
+        include:
+
+        - name: Node.js 11.x
+          node-version: "11.15"
+
+        - name: Node.js 12.x
+          node-version: "12.22"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install Node.js ${{ matrix.node-version }}
+      shell: bash -eo pipefail -l {0}
+      run: |
+        nvm install --default ${{ matrix.node-version }}
+        dirname "$(nvm which ${{ matrix.node-version }})" >> "$GITHUB_PATH"
+    - name: Configure npm
+      run: |
+        npm config set loglevel error
+        npm config set shrinkwrap false
+    - name: Install npm module(s) ${{ matrix.npm-i }}
+      run: npm install --save-dev ${{ matrix.npm-i }}
+      if: matrix.npm-i != ''
+
+    - name: Remove non-test dependencies
+      run: npm rm --silent --save-dev connect-redis
+
+    - name: Install Node.js dependencies
+      run: npm install
+
+    - name: List environment
+      id: list_env
+      shell: bash
+      run: |
+        echo "node@$(node -v)"
+        echo "npm@$(npm -v)"
+        npm -s ls ||:
+    - name: Run tests
+      shell: bash
+      run: npm run test
+
+    # - name: Collect code coverage
+    #   uses: coverallsapp/github-action@master
+    #   with:
+    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    #     flag-name: run-${{ matrix.test_number }}
+    #     parallel: true
+
+  # coverage:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Upload code coverage
+  #     uses: coverallsapp/github-action@master
+  #     with:
+  #       github-token: ${{ secrets.github_token }}
+  #       parallel-finished: true
