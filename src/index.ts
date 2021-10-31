@@ -34,14 +34,17 @@ function makeCase<A>(
   onComplete: (a: A) => Promise<void>,
   onError: (a: A, err: Error) => Promise<void>
 ): Resource<A> {
-  return new Resource(() => build().then(a => { return {
-    value: a,
-    shutdown: (exitCase: ExitCase) => {
-      if (exitCase === 'Success') return onComplete(a)
-      else if (exitCase === 'UnknownError') return onError(a, new Error(exitCase))
-      else return onError(a, exitCase)
+  return new Resource(async () => {
+    const a = await build()
+    return {
+      value: a,
+      shutdown: (exitCase: ExitCase) => {
+        if (exitCase === 'Success') return onComplete(a)
+        else if (exitCase === 'UnknownError') return onError(a, new Error(exitCase))
+        else return onError(a, exitCase)
+      }
     }
-  }}))
+  })
 }
 
 function make<A>(
