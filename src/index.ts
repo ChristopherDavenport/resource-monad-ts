@@ -1,7 +1,7 @@
 
 
 
-type ExitCase = 'Success' | Error
+type ExitCase = 'Success' | 'UnknownError' | Error
 
 class Resource<A>{
   readonly allocate: () => Promise<{value: A, shutdown: (exitCase: ExitCase) => Promise<void>}>
@@ -22,7 +22,7 @@ class Resource<A>{
     return this.flatMap((a: A) => pure(f(a)))
   }
 
-  public use<B>(f: (a: A) => Promise<B>){
+  public use<B>(f: (a: A) => Promise<B>): () => Promise<B>{
     return useI(this, f)
   }
 }
@@ -38,6 +38,7 @@ function makeCase<A>(
     value: a,
     shutdown: (exitCase: ExitCase) => {
       if (exitCase === 'Success') return onComplete(a)
+      else if (exitCase === 'UnknownError') return onError(a, new Error(exitCase))
       else return onError(a, exitCase)
     }
   }}))
@@ -97,6 +98,7 @@ function evalMapI<A, B>(resource: Resource<A>, f: (a: A) => Promise<B>): Resourc
 // TODO: Stack Safety?
 function useI<A, B> (resource: Resource<A>, f: (a: A) => Promise<B>): () => Promise<B>{
   return async () => {
+    var shutdownV = false
     const {
       value,
       shutdown
@@ -106,11 +108,14 @@ function useI<A, B> (resource: Resource<A>, f: (a: A) => Promise<B>): () => Prom
       return x
     } catch(e) {
       if (e instanceof Error){
-        await shutdown(e)
+        await shutdown(e).finally(() => {shutdownV = true})
         throw e
-      } else throw e // TODO I don't really understand this case...
+      } else {
+        await shutdown('UnknownError').finally(() => {shutdownV = true})
+        throw e
+      }
     } finally {
-      await shutdown('Success')
+      if (!shutdownV) await shutdown('Success')
     }
   }
 }
