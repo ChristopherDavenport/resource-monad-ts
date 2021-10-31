@@ -1,6 +1,6 @@
 {
   "name": "resource-monad",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Resource Monad integration with promises",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,6 +19,13 @@
     "resource",
     "monad",
     "promise"
+  ],
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/index.js.map",
+    "LICENSE",
+    "README.md"
   ],
   "author": "Christopher Davenport",
   "license": "MIT",
