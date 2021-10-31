@@ -108,11 +108,18 @@ function useI<A, B> (resource: Resource<A>, f: (a: A) => Promise<B>): () => Prom
 }
 
 // Move to tests
-// const log = (s: string) => make(async () => {console.log("Starting " + s)}, async () => { console.log("Shutdown " + s)})
+// const log: (s: string) => Resource<void> = (s: string) => {
+//   return make(
+//     async () => {console.log("Starting " + s)},
+//     async () => { console.log("Shutdown " + s)}
+//   )
+// }
 
-// log("1")
-// .flatMap((_) => log("2"))
-// .use(async (a: void) => { console.log("Using")})()
+// const display = log("1")
+//   .flatMap((_) => log("2"))
+//   .use(async (a: void) => { console.log("Using")})
+
+// display()
 
 
 export default {

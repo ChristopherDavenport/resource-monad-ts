@@ -1,6 +1,6 @@
 {
   "name": "resource-monad",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Resource Monad integration with promises",
   "main": "dist/index.js",
   

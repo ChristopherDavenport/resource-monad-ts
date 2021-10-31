@@ -5,7 +5,7 @@ Resource Monad is a simple implementation of a monadic style to resource handlin
 ```ts
 import resource from "resource-monad"
 
-const log: resource.Resource<void> = (s: string) => {
+const log: (s: string) => resource.Resource<void> = (s: string) => {
   return resource.make(
     async () => {console.log("Starting " + s)},
     async () => { console.log("Shutdown " + s)}
