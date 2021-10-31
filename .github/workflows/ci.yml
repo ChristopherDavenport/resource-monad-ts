@@ -11,16 +11,18 @@ jobs:
       fail-fast: false
       matrix:
         name:
-        - Node.js 11.x
         - Node.js 12.x
+        - Node.js 14.x
+        - Node.js 16.x
 
         include:
 
-        - name: Node.js 11.x
-          node-version: "11.15"
-
         - name: Node.js 12.x
           node-version: "12.22"
+        - name: Node.js 14.x
+          node-version: "14.18"
+        - name: Node.js 16.x
+          node-version: "16.6"
 
     steps:
     - uses: actions/checkout@v2
